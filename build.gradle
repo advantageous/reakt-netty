@@ -1,0 +1,128 @@
+/*
+ *
+ *  Copyright (c) 2016. Rick Hightower, Geoff Chandler
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    		http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+group 'io.advantageous.reakt.kinesis'
+version '0.1.0'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+apply plugin: 'idea'
+
+
+ext {
+    nettyVersion="4.1.5.Final"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.11'
+}
+
+test.onlyIf { !Boolean.getBoolean('skip.tests') }
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    compile 'io.advantageous.reakt:reakt:3.1.0'
+    compile "io.netty:netty-common:${nettyVersion}"
+    compile "io.netty:netty-transport:${nettyVersion}"
+    compile "io.netty:netty-buffer:${nettyVersion}"
+    compile "io.netty:netty-handler:${nettyVersion}"
+    compile "io.netty:netty-codec-http:${nettyVersion}"
+    compile "io.netty:netty-codec-http2:${nettyVersion}"
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    required false
+    sign configurations.archives
+}
+
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                try {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                } catch (MissingPropertyException ignore) {
+                }
+            }
+
+            pom.project {
+                packaging 'jar'
+                name project.name
+                description "Reactive interfaces. Promises, Streams, Callbacks, Async results, interfaces for Java  that are lambda expression friendly and fluent."
+
+                url 'https://github.com/advantageous/reakt-netty'
+
+                scm {
+                    url 'scm:git@github.com:advantageous/reakt-netty.git'
+                    connection 'scm:git@github.com:advantageous/reakt-netty.git'
+                    developerConnection 'scm:git@github.com:advantageous/reakt-netty.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'richardHightower'
+                        name 'Richard Hightower'
+                    }
+                    developer {
+                        id 'sailorgeoffrey'
+                        name 'Geoffrey Chandler'
+                    }
+                }
+            }
+        }
+    }
+}
+
+
