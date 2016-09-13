@@ -29,11 +29,8 @@ public final class HttpHelloWorldServer {
 
     public static void main(String[] args) throws Exception {
 
-        final ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
 
         serverBuilder()
-                .withServerBootstrap(serverBootstrap)
                 .withPort(PORT)
                 .withThrottle(true)
                 .withInitialRequestCount(OUTSTANDING_REQUEST_COUNT)

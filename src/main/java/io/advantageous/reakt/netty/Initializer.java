@@ -8,11 +8,11 @@ import io.netty.channel.socket.SocketChannel;
 import java.util.List;
 import java.util.function.Function;
 
-public class ServerInitializer extends ChannelInitializer<SocketChannel> {
+public class Initializer extends ChannelInitializer<SocketChannel> {
 
     private final List<Function<SocketChannel, ChannelHandler>> channelHandlerSupplierList;
 
-    public ServerInitializer(final List<Function<SocketChannel, ChannelHandler>> channelHandlerSupplierList) {
+    public Initializer(final List<Function<SocketChannel, ChannelHandler>> channelHandlerSupplierList) {
         this.channelHandlerSupplierList = channelHandlerSupplierList;
     }
 

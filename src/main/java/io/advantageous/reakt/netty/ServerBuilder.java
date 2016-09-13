@@ -4,16 +4,13 @@ import io.advantageous.reakt.Stream;
 import io.advantageous.reakt.netty.http.HttpServerHandlerBuilder;
 import io.advantageous.reakt.netty.http.HttpServerRequestContext;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.ServerChannel;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 
 import static io.advantageous.reakt.netty.http.HttpServerHandlerBuilder.httpServerHandlerBuilder;
-import static io.advantageous.reakt.netty.ServerInitializerBuilder.serverInitializerBuilder;
+import static io.advantageous.reakt.netty.InitializerBuilder.initializerBuilder;
 
 public class ServerBuilder {
     private EventLoopGroup parentGroup;
@@ -97,6 +94,10 @@ public class ServerBuilder {
     }
 
     public ServerBootstrap getServerBootstrap() {
+        if (serverBootstrap == null) {
+            serverBootstrap = new ServerBootstrap();
+            serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
+        }
         return serverBootstrap;
     }
 
@@ -178,19 +179,19 @@ public class ServerBuilder {
                 .withInitialRequestCount(getInitialRequestCount())
                 .withRequestStream(requestStream);
 
-        final ServerInitializerBuilder serverInitializerBuilder = serverInitializerBuilder()
-                .useHttp(ssl);
+        final InitializerBuilder initializerBuilder = initializerBuilder()
+                .useServerHttp(ssl);
 
         if (isThrottle()) {
-            serverInitializerBuilder.addChannelHandler(
+            initializerBuilder.addChannelHandler(
                     httpServerHandlerBuilder.build()
             );
         } else {
-            serverInitializerBuilder.addChannelHandlerSupplier(() -> httpServerHandlerBuilder.build());
+            initializerBuilder.addChannelHandlerSupplier(() -> httpServerHandlerBuilder.build());
         }
 
         withOnClose(requestStream)
-                .withInitHandler(serverInitializerBuilder.build());
+                .withInitHandler(initializerBuilder.build());
 
         return this;
     }

@@ -2,6 +2,8 @@ package io.advantageous.reakt.netty;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -14,30 +16,30 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class ServerInitializerBuilder {
+public class InitializerBuilder {
 
     private final List<Function<SocketChannel, ChannelHandler>> channelHandlerSupplierList = new ArrayList<>();
 
 
-    public static ServerInitializerBuilder serverInitializerBuilder() {
-        return new ServerInitializerBuilder();
+    public static InitializerBuilder initializerBuilder() {
+        return new InitializerBuilder();
     }
 
-    public ServerInitializerBuilder addChannelHandler(final ChannelHandler channelHandler) {
+    public InitializerBuilder addChannelHandler(final ChannelHandler channelHandler) {
         channelHandlerSupplierList.add(socketChannel -> channelHandler);
         return this;
     }
 
-    public ServerInitializerBuilder addChannelHandlerSupplier(final Supplier<? extends ChannelHandler> supplier) {
+    public InitializerBuilder addChannelHandlerSupplier(final Supplier<? extends ChannelHandler> supplier) {
         channelHandlerSupplierList.add(socketChannel -> supplier.get());
         return this;
     }
-    public ServerInitializerBuilder addChannelHandlerFunction(final Function<SocketChannel, ChannelHandler> function) {
+    public InitializerBuilder addChannelHandlerFunction(final Function<SocketChannel, ChannelHandler> function) {
         channelHandlerSupplierList.add(function);
         return this;
     }
 
-    public ServerInitializerBuilder useSslSelfSigned() {
+    public InitializerBuilder useSslSelfSigned() {
         channelHandlerSupplierList.set(0, socketChannel -> {
 
             try {
@@ -54,12 +56,12 @@ public class ServerInitializerBuilder {
         return this;
     }
 
-    public ServerInitializerBuilder useHttp() {
-        useHttp(false);
+    public InitializerBuilder useServerHttp() {
+        useServerHttp(false);
         return this;
     }
 
-    public ServerInitializerBuilder useHttp(boolean ssl) {
+    public InitializerBuilder useServerHttp(final boolean ssl) {
         if (ssl) {
             useSslSelfSigned();
         }
@@ -67,9 +69,22 @@ public class ServerInitializerBuilder {
         return this;
     }
 
+    public InitializerBuilder useClientHttp() {
+        useClientHttp(false);
+        return this;
+    }
 
-    public ServerInitializer build() {
-        return new ServerInitializer(channelHandlerSupplierList);
+    public InitializerBuilder useClientHttp(final boolean ssl) {
+        if (ssl) {
+            useSslSelfSigned();
+        }
+        addChannelHandlerSupplier(HttpClientCodec::new);
+        addChannelHandlerSupplier(HttpContentDecompressor::new);
+        return this;
+    }
+
+    public Initializer build() {
+        return new Initializer(channelHandlerSupplierList);
     }
 
 }
