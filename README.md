@@ -37,15 +37,11 @@ import static io.advantageous.reakt.netty.ServerBuilder.serverBuilder;
 ```java
     private static void handleRequest(final StreamResult<HttpServerRequestContext> result) {
         /** See if stream stopped in this case, HttpServer stream of httpRequests. */
-        if (result.complete()) {
-            System.out.println("Server stopped");
-            return;
-        }
+        if (result.complete()) { System.out.println("Server stopped"); return; }
         /** Handle requests. */
         result.then(httpServerRequestContext -> {  // <--- stream processing then(
-            /* If request path ends with "stop" 
-             * Cancel more requests coming from the stream, which shuts down the HttpServer. 
-             */
+            // If request path ends with "stop" 
+            // Cancel more requests coming from the stream, which shuts down the HttpServer. 
             if (httpServerRequestContext.getHttpRequest().uri().contains("stop")) {
                 httpServerRequestContext.sendOkResponse("DONE\n");
                 result.cancel();
