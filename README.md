@@ -84,3 +84,28 @@ $ curl http://localhost:8080/stop
 # Server will be closed after this. (This is a test to show how streaming works)
 
 ```
+
+#### Status 9/13/2015
+(Compare the status of this to the number of commits after this date.)
+Fairly early days for this project.
+We want to provide a thin layer around ***Netty*** and then make it easy to 
+create an ***HttpServer*** (this is the furthest along), an ***HttpClient***,
+***DnsClient***, ***TcpServer*** and a ***TcpClient***. We don't plan on abstracting any of the
+lower level Netty classes. You will work with Netty directly.
+Server will supports streams via Reakt and possibly reactive streaming specification. 
+Clients will support Promises and Streams via Reakt. 
+There will be (and is) builders to get rid of the boiler code, but you can
+always pass a builder Netty handlers, and such (or replace a boiler point creating 
+of a Netty object with something better).
+
+Goals
+* HttpServer that uses full Reakt stream support (DONE)
+* HttpClient that uses Reakt promises (in progress)
+* HttpServer/HttpClient that can stream http responses into messages. 
+* HttpServer/HttpClient that can stream via WebSocket messages with Reakt stream support to control the stream
+* DnsClient
+* TcpServer that can have a server side stream handler via Reakt
+* TcpClient that can consume a serverside stream
+* TcpClient that can stream calls and responses  (using Promises)
+* The classes and builders to make this happen so building similar things with Reakt/Netty is easy and Java lambda friendly
+ 
