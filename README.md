@@ -35,18 +35,14 @@ import static io.advantageous.reakt.netty.ServerBuilder.serverBuilder;
 
 #### Handle stream results
 ```java
-
     private static void handleRequest(final StreamResult<HttpServerRequestContext> result) {
         /** See if stream stopped in this case, HttpServer stream of httpRequests. */
         if (result.complete()) {
             System.out.println("Server stopped");
             return;
         }
-        
         /** Handle requests. */
         result.then(httpServerRequestContext -> {  // <--- stream processing then(
-
-            
             /* If request path ends with "stop" 
              * Cancel more requests coming from the stream, which shuts down the HttpServer. 
              */
@@ -55,11 +51,8 @@ import static io.advantageous.reakt.netty.ServerBuilder.serverBuilder;
                 result.cancel();
                 return;
             }
-
-            /*
-             * If request path ends with "pause"
-             * Stop processing requests for 10 seconds. Using stream request more method.
-             */
+            // If request path ends with "pause"
+            // Stop processing requests for 10 seconds. Using stream request more method.
             if (httpServerRequestContext.getHttpRequest().uri().contains("pause")) {
                 result.request(OUTSTANDING_REQUEST_COUNT * -1);   // <-- uses stream result request
                 // Disable requests for 10 seconds 
@@ -69,9 +62,7 @@ import static io.advantageous.reakt.netty.ServerBuilder.serverBuilder;
                 // Ask for another request.
                 result.request(1);
             }
-            /*
-             * Send an ok message. "HelloWorld!\n"
-             */
+            // Send an ok message. "HelloWorld!\n"
             httpServerRequestContext.sendOkResponse("Hello World!\n");
         }).catchError(error -> { // <-- stream processing catch Error
             error.printStackTrace();
