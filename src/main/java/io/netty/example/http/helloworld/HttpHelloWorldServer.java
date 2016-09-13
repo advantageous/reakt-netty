@@ -7,13 +7,19 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 import static io.advantageous.reakt.netty.ServerBuilder.serverBuilder;
 
 /**
  * An HTTP server that sends back the content of the received HTTP request
  * in a pretty plaintext form.
+ * <p>
+ * To get a hello world.
+ * curl http://localhost:8080/hello
+ * <p>
+ * To test streamResult.request(numRequests) works
+ * <p>
+ * To test streamResult.cancel works.
  */
 public final class HttpHelloWorldServer {
 
@@ -38,13 +44,19 @@ public final class HttpHelloWorldServer {
     }
 
     private static void handleRequest(final StreamResult<HttpServerRequestContext> result) {
+        /** See if stream stopped in this case, HttpServer stream of httpRequests. */
         if (result.complete()) {
             System.out.println("Server stopped");
             return;
         }
-        result.then(httpServerRequestContext -> {
 
-            /* Cancel more requests coming from the stream, which shuts down the HttpServer. */
+        /** Handle requests. */
+        result.then(httpServerRequestContext -> {  // <--- stream processing then(
+
+
+            /* If request path ends with "stop"
+             * Cancel more requests coming from the stream, which shuts down the HttpServer.
+             */
             if (httpServerRequestContext.getHttpRequest().uri().contains("stop")) {
                 httpServerRequestContext.sendOkResponse("DONE\n");
                 result.cancel();
@@ -52,21 +64,23 @@ public final class HttpHelloWorldServer {
             }
 
             /*
-             * Stop processing requests for 30 seconds. Using stream request more method.
+             * If request path ends with "pause"
+             * Stop processing requests for 10 seconds. Using stream request more method.
              */
             if (httpServerRequestContext.getHttpRequest().uri().contains("pause")) {
-                result.request(OUTSTANDING_REQUEST_COUNT * -1);
+                result.request(OUTSTANDING_REQUEST_COUNT * -1);   // <-- uses stream result request
+                // Disable requests for 10 seconds
                 httpServerRequestContext.schedule(Duration.ofSeconds(10),
-                        ()-> result.request(OUTSTANDING_REQUEST_COUNT));
+                        () -> result.request(OUTSTANDING_REQUEST_COUNT));
             } else {
                 // Ask for another request.
                 result.request(1);
             }
             /*
-             * Send an ok message.
+             * Send an ok message. "HelloWorld!\n"
              */
             httpServerRequestContext.sendOkResponse("Hello World!\n");
-        }).catchError(error -> {
+        }).catchError(error -> { // <-- stream processing catch Error
             error.printStackTrace();
         });
     }
