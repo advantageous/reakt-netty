@@ -112,8 +112,8 @@ public class ClientBuilder {
         return this;
     }
 
-    public Client build() {
-        return new Client(getGroup(), getBootstrap(), getChannelClassType(), getChannelInboundHandlerAdapter(),
+    public SimpleHttpClient buildSimpleHttpClient() {
+        return new SimpleHttpClient(getGroup(), getBootstrap(), getChannelClassType(), getChannelInboundHandlerAdapter(),
                 getInitHandler(), getOnClose());
     }
 

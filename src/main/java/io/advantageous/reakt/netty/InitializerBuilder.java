@@ -81,12 +81,7 @@ public class InitializerBuilder {
         }
         addChannelHandlerSupplier(HttpClientCodec::new);
         addChannelHandlerSupplier(HttpContentDecompressor::new);
-        addChannelHandlerSupplier(new Supplier<ChannelHandler>() {
-            @Override
-            public ChannelHandler get() {
-                return new HttpObjectAggregator(512*1024);
-            }
-        });
+        addChannelHandlerSupplier(() -> new HttpObjectAggregator(512*1024));
         return this;
     }
 

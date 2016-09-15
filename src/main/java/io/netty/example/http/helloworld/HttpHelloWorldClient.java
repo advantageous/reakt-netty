@@ -1,6 +1,7 @@
 package io.netty.example.http.helloworld;
 
 import io.advantageous.reakt.netty.Client;
+import io.advantageous.reakt.netty.SimpleHttpClient;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpResponse;
@@ -16,9 +17,9 @@ public class HttpHelloWorldClient {
     static final boolean SSL = System.getProperty("ssl") != null;
     public static void main(String[] args) throws Exception {
 
-        final Client client = clientBuilder()
+        final SimpleHttpClient client = clientBuilder()
                 .useHttp(SSL)
-                .build();
+                .buildSimpleHttpClient();
 
         client.start();
 
