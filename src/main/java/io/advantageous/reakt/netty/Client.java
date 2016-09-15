@@ -41,7 +41,7 @@ public class Client {
         this.onClose = Expected.ofNullable(onClose);
     }
 
-    public Promise<HttpResponse> sendRequest(final URI requestURI, final String contentType, final String body) {
+    public Promise<FullHttpResponse> sendRequest(final URI requestURI, final String contentType, final String body) {
 
         return Promises.invokablePromise(returnPromise -> {
             final HttpRequest httpRequest = new DefaultFullHttpRequest(
@@ -97,8 +97,8 @@ public class Client {
     }
 
     private class ReaktChannelFutureListener implements ChannelFutureListener {
-        private final Promise<HttpResponse> promise;
-        ReaktChannelFutureListener(final Promise<HttpResponse> promise) {
+        private final Promise<FullHttpResponse> promise;
+        ReaktChannelFutureListener(final Promise<FullHttpResponse> promise) {
             this.promise = promise;
         }
         @Override
@@ -106,9 +106,9 @@ public class Client {
             if (!channelFuture.isSuccess()) {
                 promise.reject(channelFuture.cause());
             } else {
-                channelFuture.channel().pipeline().addLast(new SimpleChannelInboundHandler<HttpResponse>() {
+                channelFuture.channel().pipeline().addLast(new SimpleChannelInboundHandler<FullHttpResponse>() {
                     @Override
-                    protected void channelRead0(ChannelHandlerContext ctx, HttpResponse msg) throws Exception {
+                    protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) throws Exception {
                         promise.resolve(msg);
                     }
 
@@ -125,8 +125,9 @@ public class Client {
     class Request {
         private final URI requestURI;
         private final HttpRequest httpRequest;
-        private final Promise<HttpResponse> returnPromise;
-        Request(URI requestURI, HttpRequest httpRequest, Promise<HttpResponse> returnPromise) {
+        private final Promise<FullHttpResponse> returnPromise;
+        Request(final URI requestURI, final HttpRequest httpRequest,
+                final Promise<FullHttpResponse> returnPromise) {
             this.requestURI = requestURI;
             this.httpRequest = httpRequest;
             this.returnPromise = returnPromise;

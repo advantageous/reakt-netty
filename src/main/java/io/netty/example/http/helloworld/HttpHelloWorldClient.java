@@ -6,6 +6,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpResponse;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 import static io.advantageous.reakt.netty.ClientBuilder.clientBuilder;
@@ -24,7 +25,8 @@ public class HttpHelloWorldClient {
         for (int index = 0; index < 100; index++) {
             client.sendRequest(URI.create("http://localhost:8080/hello"), "text/play", "HELLO WORLD! " + index)
                     .then(httpResponse -> {
-                        System.out.println("GOT The Body...........!!!!" );
+                        final String body = httpResponse.content().toString(StandardCharsets.UTF_8);
+                        System.out.println("GOT The Body...........!!!! \n" + body);
                     })
                     .catchError(error -> error.printStackTrace())
                     .invoke();
