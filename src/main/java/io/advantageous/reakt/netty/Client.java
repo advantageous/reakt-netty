@@ -59,15 +59,13 @@ public class Client {
 
             try {
                 bootstrap.group(group)
-                        .channel(channelClassType).handler(handler);
-
+                        .channel(channelClassType)
+                        .handler(handler);
 
                 while (true) {
                     Request request = httpRequests.poll(50, TimeUnit.MILLISECONDS);
                     while (request != null) {
-
                         final Request theRequest = request;
-
                         /** Handle the connection async. */
                         bootstrap.connect(request.requestURI.getHost(), request.requestURI.getPort())
                                 .addListener((final ChannelFuture channelFuture) -> {
@@ -79,10 +77,7 @@ public class Client {
                                                 .addListener(new ReaktChannelFutureListener(theRequest.returnPromise));
                                     }
                                 });
-
                         request = httpRequests.poll();
-
-
                     }
                 }
 
@@ -103,11 +98,9 @@ public class Client {
 
     private class ReaktChannelFutureListener implements ChannelFutureListener {
         private final Promise<HttpResponse> promise;
-
         ReaktChannelFutureListener(final Promise<HttpResponse> promise) {
             this.promise = promise;
         }
-
         @Override
         public final void operationComplete(final ChannelFuture channelFuture) throws Exception {
             if (!channelFuture.isSuccess()) {
@@ -127,15 +120,12 @@ public class Client {
                 promise.resolve();
             }
         }
-
-
     }
 
     class Request {
         private final URI requestURI;
         private final HttpRequest httpRequest;
         private final Promise<HttpResponse> returnPromise;
-
         Request(URI requestURI, HttpRequest httpRequest, Promise<HttpResponse> returnPromise) {
             this.requestURI = requestURI;
             this.httpRequest = httpRequest;
