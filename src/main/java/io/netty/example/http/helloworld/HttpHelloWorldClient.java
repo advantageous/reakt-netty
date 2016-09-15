@@ -31,6 +31,7 @@ public class HttpHelloWorldClient {
                     .catchError(error -> error.printStackTrace())
                     .invoke();
         }
+
         Thread.sleep(1_000_000_000);
     }
 }

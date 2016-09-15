@@ -109,6 +109,7 @@ public class Client {
                 channelFuture.channel().pipeline().addLast(new SimpleChannelInboundHandler<FullHttpResponse>() {
                     @Override
                     protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) throws Exception {
+
                         promise.resolve(msg);
                     }
 
@@ -117,7 +118,6 @@ public class Client {
                         promise.reject(cause);
                     }
                 });
-                promise.resolve();
             }
         }
     }
