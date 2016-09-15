@@ -85,6 +85,49 @@ $ curl http://localhost:8080/stop
 
 ```
 
+
+
+#### Use Netty to make simple HTTP requests: use Reakt promise to handle request callback
+```java
+
+
+ final SimpleHttpClient client = clientBuilder()
+                .useHttp(SSL)
+                .buildSimpleHttpClient();
+                
+                ...
+ client.get(URI.create("http://localhost:8080/hello"))
+           .then(httpResponse -> {
+              final String body = httpResponse.content().toString(StandardCharsets.UTF_8);
+                        System.out.println("GOT The Body...........!!!! \n" + body);
+             })
+           .catchError(error -> error.printStackTrace())
+           .invoke();                
+
+```
+
+#### Status 9/15/2013
+Added client support. Still needs better code coverage, but a basic HttpClient and Server exists. 
+The SimpleHttpClient creates a connection per request. It is very basic. 
+It also uses HttpFullResponse instead of partial responses. 
+
+Tactical: 
+* Write some tests to improve code coverage
+* Edge case testing. Server not there. Can't connect. Server does not respond. Hanlde timeouts. 
+* Make reakt-netty a lib that QBit can use (for testing and proving out reakt-netty)
+
+Goals progress
+* HttpServer that uses full Reakt stream support (DONE)
+* HttpClient that uses Reakt promises (wrote simple one, DONE for now)
+* HttpServer/HttpClient that can stream http responses into messages. 
+* HttpServer/HttpClient that can stream via WebSocket messages with Reakt stream support to control the stream
+* DnsClient
+* TcpServer that can have a server side stream handler via Reakt
+* TcpClient that can consume a serverside stream
+* TcpClient that can stream calls and responses  (using Promises)
+* The classes and builders to make this happen so building similar things with Reakt/Netty is easy and Java lambda friendly
+ 
+
 #### Status 9/13/2015
 (Compare the status of this to the number of commits after this date.)
 Fairly early days for this project.

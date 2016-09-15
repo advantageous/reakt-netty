@@ -30,34 +30,18 @@ public abstract class Client {
         this.channelInboundHandlerAdapter = channelInboundHandlerAdapter;
         this.handler = handler;
         this.onClose = Expected.ofNullable(onClose);
+        bootstrap.group(group)
+                .channel(channelClassType)
+                .handler(handler);
     }
 
-    public void start() {
-
-        new Thread(() -> {
-
-            try {
-                bootstrap.group(group)
-                        .channel(channelClassType)
-                        .handler(handler);
-
-
-                process();
-
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            } finally {
-                group.shutdownGracefully();
-            }
-        }).start();
-
-
-    }
-
-    protected abstract void process() throws Exception;
 
     public void stop() {
-        group.shutdownGracefully();
+        try {
+            group.shutdownGracefully();
+        } finally {
+            onClose.ifPresent(Runnable::run);
+        }
     }
 
 }

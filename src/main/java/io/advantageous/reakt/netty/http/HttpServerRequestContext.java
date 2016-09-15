@@ -12,9 +12,8 @@ import io.netty.util.AsciiString;
 
 import java.nio.charset.StandardCharsets;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class HttpServerRequestContext extends ServerMessageContext<HttpRequest> {
@@ -25,7 +24,6 @@ public class HttpServerRequestContext extends ServerMessageContext<HttpRequest> 
     public static final AsciiString KEEP_ALIVE = new AsciiString("keep-alive");
     public static final AsciiString CONTENT_TYPE_TEXT_PLAIN = new AsciiString("text/plain; charset=utf-8");
     public static final AsciiString CONTENT_TYPE_JSON = new AsciiString("application/json; charset=utf-8");
-
 
 
     public HttpServerRequestContext(ChannelHandlerContext channelHandlerContext, HttpRequest message) {
@@ -54,7 +52,7 @@ public class HttpServerRequestContext extends ServerMessageContext<HttpRequest> 
 
 
     public void sendResponse(final CharSequence contentType, final HttpResponseStatus status, final CharSequence body) {
-        final FullHttpResponse response  = new DefaultFullHttpResponse(HTTP_1_1, status,
+        final FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status,
                 Unpooled.wrappedBuffer(body.toString().getBytes(StandardCharsets.UTF_8)));
         response.headers().set(CONTENT_TYPE, contentType);
         response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());

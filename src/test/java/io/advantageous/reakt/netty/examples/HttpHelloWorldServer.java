@@ -1,10 +1,8 @@
-package io.netty.example.http.helloworld;
+package io.advantageous.reakt.netty.examples;
 
 
 import io.advantageous.reakt.StreamResult;
 import io.advantageous.reakt.netty.http.HttpServerRequestContext;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelOption;
 
 import java.time.Duration;
 

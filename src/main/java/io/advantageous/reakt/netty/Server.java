@@ -3,13 +3,8 @@ package io.advantageous.reakt.netty;
 import io.advantageous.reakt.Expected;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
-
-import java.util.function.Consumer;
 
 public class Server {
 

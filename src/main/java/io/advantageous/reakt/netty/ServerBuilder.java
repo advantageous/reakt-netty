@@ -9,8 +9,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 
-import static io.advantageous.reakt.netty.http.HttpServerHandlerBuilder.httpServerHandlerBuilder;
 import static io.advantageous.reakt.netty.InitializerBuilder.initializerBuilder;
+import static io.advantageous.reakt.netty.http.HttpServerHandlerBuilder.httpServerHandlerBuilder;
 
 public class ServerBuilder {
     private EventLoopGroup parentGroup;
@@ -174,7 +174,8 @@ public class ServerBuilder {
     public ServerBuilder useHttp(final boolean ssl, final Stream<HttpServerRequestContext> requestStream) {
 
         final HttpServerHandlerBuilder httpServerHandlerBuilder = httpServerHandlerBuilder()
-                .withOnCancel(() -> {})
+                .withOnCancel(() -> {
+                })
                 .withThrottleRequests(isThrottle())
                 .withInitialRequestCount(getInitialRequestCount())
                 .withRequestStream(requestStream);

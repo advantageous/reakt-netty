@@ -3,7 +3,6 @@ package io.advantageous.reakt.netty.http;
 
 import io.advantageous.reakt.Expected;
 import io.advantageous.reakt.Stream;
-import io.advantageous.reakt.netty.http.HttpServerRequestContext;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.HttpRequest;

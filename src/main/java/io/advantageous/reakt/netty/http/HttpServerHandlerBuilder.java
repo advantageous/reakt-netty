@@ -14,18 +14,21 @@ public class HttpServerHandlerBuilder {
 
     private long initialRequestCount = 100;
 
+    public static HttpServerHandlerBuilder httpServerHandlerBuilder() {
+        return new HttpServerHandlerBuilder();
+    }
 
     public long getInitialRequestCount() {
         return initialRequestCount;
     }
 
+    public void setInitialRequestCount(long initialRequestCount) {
+        this.initialRequestCount = initialRequestCount;
+    }
+
     public HttpServerHandlerBuilder withInitialRequestCount(long initialRequestCount) {
         this.initialRequestCount = initialRequestCount;
         return this;
-    }
-
-    public void setInitialRequestCount(long initialRequestCount) {
-        this.initialRequestCount = initialRequestCount;
     }
 
     public Duration getCheckRate() {
@@ -41,23 +44,17 @@ public class HttpServerHandlerBuilder {
         return this;
     }
 
-
-
     public boolean isThrottleRequests() {
         return throttleRequests;
-    }
-
-    public HttpServerHandlerBuilder withThrottleRequests(boolean throttleRequests) {
-        this.throttleRequests = throttleRequests;
-        return this;
     }
 
     public void setThrottleRequests(boolean throttleRequests) {
         this.throttleRequests = throttleRequests;
     }
 
-    public static HttpServerHandlerBuilder httpServerHandlerBuilder() {
-        return new HttpServerHandlerBuilder();
+    public HttpServerHandlerBuilder withThrottleRequests(boolean throttleRequests) {
+        this.throttleRequests = throttleRequests;
+        return this;
     }
 
     public Runnable getOnCancel() {

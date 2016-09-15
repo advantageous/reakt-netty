@@ -5,13 +5,13 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpResponse;
 
 /**
  * Adapts a Netty Channel Future to a Reakt Promise.
  * This is so you can do a request / reply type scenario like an HTTP request that expects a reply.
  * This would not work with a truly streaming request / reply protocol.
  * It would have to be Http like.
+ *
  * @param <T>
  */
 public class ReaktChannelRequestReplyFutureListener<T> implements ChannelFutureListener {
@@ -29,8 +29,9 @@ public class ReaktChannelRequestReplyFutureListener<T> implements ChannelFutureL
             channelFuture.channel().pipeline().addLast(new SimpleChannelInboundHandler<Object>() {
                 @Override
                 protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-                    promise.resolve((T)msg);
+                    promise.resolve((T) msg);
                 }
+
                 @Override
                 public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                     promise.reject(cause);

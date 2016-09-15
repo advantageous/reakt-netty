@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public class ServerMessageContext <M> {
+public class ServerMessageContext<M> {
 
     private final ChannelHandlerContext channelHandlerContext;
     private final M message;

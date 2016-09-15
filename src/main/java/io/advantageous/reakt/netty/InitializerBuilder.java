@@ -35,6 +35,7 @@ public class InitializerBuilder {
         channelHandlerSupplierList.add(socketChannel -> supplier.get());
         return this;
     }
+
     public InitializerBuilder addChannelHandlerFunction(final Function<SocketChannel, ChannelHandler> function) {
         channelHandlerSupplierList.add(function);
         return this;
@@ -81,7 +82,7 @@ public class InitializerBuilder {
         }
         addChannelHandlerSupplier(HttpClientCodec::new);
         addChannelHandlerSupplier(HttpContentDecompressor::new);
-        addChannelHandlerSupplier(() -> new HttpObjectAggregator(512*1024));
+        addChannelHandlerSupplier(() -> new HttpObjectAggregator(512 * 1024));
         return this;
     }
 
