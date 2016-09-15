@@ -1,12 +1,15 @@
 package io.advantageous.reakt.netty;
 
 import io.advantageous.reakt.Expected;
-import io.advantageous.reakt.reactor.Reactor;
+import io.advantageous.reakt.promise.Promise;
+import io.advantageous.reakt.promise.Promises;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.*;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -40,30 +43,15 @@ public class Client {
         this.onClose = Expected.ofNullable(onClose);
     }
 
-    class Request {
-        private final URI requestURI;
-        private final HttpRequest httpRequest;
+    public Promise<HttpResponse> sendRequest(final URI requestURI, final String contentType, final String body) {
 
-        Request(URI requestURI, HttpRequest httpRequest) {
-            this.requestURI = requestURI;
-            this.httpRequest = httpRequest;
-        }
-    }
-
-    public void sendRequest(final URI requestURI, final String contentType, final String body) {
-
-
-        final HttpRequest request = new DefaultFullHttpRequest(
-                HttpVersion.HTTP_1_1, HttpMethod.GET, requestURI.getRawPath(),
-                Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
-        request.headers().set(HttpHeaderNames.HOST, requestURI.getHost());
-        request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-
-        request.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
-
-
-        httpRequests.offer(new Request(requestURI, request));
-
+        return  Promises.invokablePromise(returnPromise-> {
+            final HttpRequest httpRequest = new DefaultFullHttpRequest(
+                    HttpVersion.HTTP_1_1, HttpMethod.GET, requestURI.getRawPath(),
+                    Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
+            httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
+            httpRequests.offer(new Request(requestURI, httpRequest, returnPromise));
+        });
 
     }
 
@@ -80,9 +68,15 @@ public class Client {
                     Request request = httpRequests.poll(50, TimeUnit.MILLISECONDS);
 
                     while (request != null) {
-                        final Channel clientChannel = bootstrap.connect(request.requestURI.getHost(), request.requestURI.getPort()).sync().channel();
-                        clientChannel.writeAndFlush(request).addListener(ChannelFutureListener.CLOSE);
-                        clientChannel.closeFuture().sync();
+                        final Channel clientChannel = bootstrap.connect(
+                                                                request.requestURI.getHost(),
+                                                                request.requestURI.getPort()).sync().channel();
+
+                        final Request theRequest = request;
+
+                        clientChannel.writeAndFlush(request.httpRequest)
+                                .addListener(new ReaktChannelFutureListener(theRequest.returnPromise));
+
                         request = httpRequests.poll();
                     }
                 }
@@ -98,8 +92,49 @@ public class Client {
 
     }
 
-    public void stop() {
+    private  class ReaktChannelFutureListener implements ChannelFutureListener {
+        private final Promise<HttpResponse> promise;
 
+        ReaktChannelFutureListener(final Promise<HttpResponse> promise) {
+            this.promise = promise;
+        }
+
+        @Override
+        public final void operationComplete(final ChannelFuture channelFuture) throws Exception {
+            if (!channelFuture.isSuccess()) {
+                promise.reject(channelFuture.cause());
+            } else {
+                channelFuture.channel().pipeline().addLast(new SimpleChannelInboundHandler<HttpResponse>() {
+                    @Override
+                    protected void channelRead0(ChannelHandlerContext ctx, HttpResponse msg) throws Exception {
+                        promise.resolve(msg);
+                    }
+
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+                        promise.reject(cause);
+                    }
+                });
+                promise.resolve();
+            }
+        }
+
+
+    }
+
+    public void stop() {
         group.shutdownGracefully();
+    }
+
+    class Request {
+        private final URI requestURI;
+        private final HttpRequest httpRequest;
+        private final Promise<HttpResponse> returnPromise;
+
+        Request(URI requestURI, HttpRequest httpRequest, Promise<HttpResponse> returnPromise) {
+            this.requestURI = requestURI;
+            this.httpRequest = httpRequest;
+            this.returnPromise = returnPromise;
+        }
     }
 }
