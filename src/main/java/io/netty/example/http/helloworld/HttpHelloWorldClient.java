@@ -21,13 +21,12 @@ public class HttpHelloWorldClient {
 
         client.start();
 
-        Thread.sleep(1000);
-
         for (int index = 0; index < 100; index++) {
             client.sendRequest(URI.create("http://localhost:8080/hello"), "text/play", "HELLO WORLD! " + index)
                     .then(httpResponse -> {
-                        System.out.println("GOT THIS FAR...........");
+                        System.out.println("GOT The Body...........!!!!" );
                     })
+                    .catchError(error -> error.printStackTrace())
                     .invoke();
         }
         Thread.sleep(1_000_000_000);

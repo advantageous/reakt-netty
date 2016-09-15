@@ -8,8 +8,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.*;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -45,7 +43,7 @@ public class Client {
 
     public Promise<HttpResponse> sendRequest(final URI requestURI, final String contentType, final String body) {
 
-        return  Promises.invokablePromise(returnPromise-> {
+        return Promises.invokablePromise(returnPromise -> {
             final HttpRequest httpRequest = new DefaultFullHttpRequest(
                     HttpVersion.HTTP_1_1, HttpMethod.GET, requestURI.getRawPath(),
                     Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
@@ -66,18 +64,25 @@ public class Client {
 
                 while (true) {
                     Request request = httpRequests.poll(50, TimeUnit.MILLISECONDS);
-
                     while (request != null) {
-                        final Channel clientChannel = bootstrap.connect(
-                                                                request.requestURI.getHost(),
-                                                                request.requestURI.getPort()).sync().channel();
 
                         final Request theRequest = request;
 
-                        clientChannel.writeAndFlush(request.httpRequest)
-                                .addListener(new ReaktChannelFutureListener(theRequest.returnPromise));
+                        /** Handle the connection async. */
+                        bootstrap.connect(request.requestURI.getHost(), request.requestURI.getPort())
+                                .addListener((final ChannelFuture channelFuture) -> {
+                                    if (!channelFuture.isSuccess()) {
+                                        theRequest.returnPromise.reject(channelFuture.cause());
+                                    } else {
+                                        final Channel clientChannel = channelFuture.channel();
+                                        clientChannel.writeAndFlush(theRequest.httpRequest)
+                                                .addListener(new ReaktChannelFutureListener(theRequest.returnPromise));
+                                    }
+                                });
 
                         request = httpRequests.poll();
+
+
                     }
                 }
 
@@ -92,7 +97,11 @@ public class Client {
 
     }
 
-    private  class ReaktChannelFutureListener implements ChannelFutureListener {
+    public void stop() {
+        group.shutdownGracefully();
+    }
+
+    private class ReaktChannelFutureListener implements ChannelFutureListener {
         private final Promise<HttpResponse> promise;
 
         ReaktChannelFutureListener(final Promise<HttpResponse> promise) {
@@ -120,10 +129,6 @@ public class Client {
         }
 
 
-    }
-
-    public void stop() {
-        group.shutdownGracefully();
     }
 
     class Request {
