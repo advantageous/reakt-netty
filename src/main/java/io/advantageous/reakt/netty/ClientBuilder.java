@@ -1,8 +1,6 @@
 package io.advantageous.reakt.netty;
 
 import io.advantageous.reakt.Stream;
-import io.advantageous.reakt.netty.http.HttpClientHandler;
-import io.advantageous.reakt.netty.http.HttpServerRequestContext;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -122,8 +120,7 @@ public class ClientBuilder {
     public ClientBuilder useHttp(final boolean ssl) {
 
         final InitializerBuilder initializerBuilder = initializerBuilder()
-                .useClientHttp(ssl)
-                .addChannelHandlerSupplier(HttpClientHandler::new);
+                .useClientHttp(ssl);
 
         withInitHandler(initializerBuilder.build());
 
